@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthWise - AI Disease Prediction</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { poppins: ['Poppins', 'sans-serif'] },
+                    colors: {
+                        darkBase: '#0b0f19',
+                        darkPanel: '#111827',
+                        neonCyan: '#00f3ff',
+                        neonBlue: '#3b82f6',
+                        neonPurple: '#8b5cf6',
+                    },
+                    animation: {
+                        'heartbeat': 'heartbeat 2s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 3s infinite',
+                    },
+                    keyframes: {
+                        heartbeat: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '10%': { transform: 'scale(1.1)' },
+                            '20%': { transform: 'scale(1)' },
+                            '30%': { transform: 'scale(1.1)' },
+                            '40%': { transform: 'scale(1)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@6.5.1/dist/framer-motion.js"></script>
+
+    <style>
+        body { margin: 0; padding: 0; background: #0b0f19; overflow-x: hidden; }
+        
+        .glass-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: 26px;
+            background: linear-gradient(45deg, #00f3ff, #8b5cf6, #3b82f6, #00f3ff);
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .glow-border:hover::before {
+            opacity: 0.7;
+        }
+
+        .input-cyber {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            color: white;
+        }
+        .input-cyber:focus {
+            border-color: #00f3ff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            outline: none;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-cyber {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .btn-cyber::before {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s;
+            z-index: -1;
+        }
+        .btn-cyber:hover::before {
+            left: 100%;
+        }
+        .btn-cyber:hover {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        /* SVG Heartbeat animation */
+        .ecg-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 3s linear infinite;
+        }
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+</head>
+<body class="font-poppins text-white antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion } = window.Motion;
+
+        const LeftPanel = () => {
+            return (
+                <div className="hidden md:flex md:w-1/2 relative bg-darkBase overflow-hidden flex-col justify-center p-12">
+                    {/* Background Orbs */}
+                    <motion.div 
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                        transition={{ duration: 8, repeat: Infinity }}
+                        className="absolute top-1/4 left-1/4 w-96 h-96 bg-neonBlue rounded-full blur-[120px] opacity-30"
+                    />
+                    <motion.div 
+                        animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
+                        transition={{ duration: 10, repeat: Infinity }}
+                        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neonPurple rounded-full blur-[120px] opacity-20"
+                    />
+                    
+                    {/* Neural Network Grid Overlay */}
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg==')] opacity-50 z-0"></div>
+
+                    {/* Content */}
+                    <div className="relative z-10 max-w-lg mx-auto">
+                        <motion.div 
+                            initial={{ y: -30, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.8 }}
+                            className="flex items-center space-x-4 mb-8"
+                        >
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-neonCyan to-neonBlue flex items-center justify-center shadow-[0_0_20px_rgba(0,243,255,0.4)] animate-heartbeat">
+                                <i className="fa-solid fa-brain text-2xl text-white"></i>
+                            </div>
+                            <span className="text-xl font-bold tracking-widest text-neonCyan uppercase">HealthWise AI</span>
+                        </motion.div>
+                        
+                        <motion.h1 
+                            initial={{ x: -50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            className="text-4xl lg:text-5xl font-extrabold leading-tight mb-6"
+                        >
+                            AI Based <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neonCyan to-neonPurple">Health Disease Prediction System</span>
+                        </motion.h1>
+                        
+                        <motion.p 
+                            initial={{ x: -50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ duration: 0.8, delay: 0.4 }}
+                            className="text-gray-400 text-lg mb-12"
+                        >
+                            Smart AI-powered disease prediction using machine learning and symptom analysis.
+                        </motion.p>
+
+                        {/* Animated Visuals */}
+                        <div className="relative h-48 w-full border border-white/10 rounded-2xl bg-black/20 backdrop-blur-sm p-4 overflow-hidden">
+                            {/* Floating Icons */}
+                            <div className="absolute top-4 right-8 text-neonCyan animate-float opacity-80 text-2xl">
+                                <i className="fa-solid fa-virus"></i>
+                            </div>
+                            <div className="absolute bottom-6 left-8 text-neonPurple animate-float-delayed opacity-80 text-3xl">
+                                <i className="fa-solid fa-stethoscope"></i>
+                            </div>
+                            <div className="absolute top-1/2 right-1/4 text-neonBlue animate-float opacity-60 text-xl">
+                                <i className="fa-solid fa-notes-medical"></i>
+                            </div>
+                            
+                            {/* ECG Wave */}
+                            <svg className="w-full h-full" viewBox="0 0 500 100" preserveAspectRatio="none">
+                                <path 
+                                    className="ecg-line" 
+                                    fill="none" 
+                                    stroke="#00f3ff" 
+                                    strokeWidth="3" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    d="M 0,50 L 100,50 L 120,20 L 140,80 L 160,50 L 300,50 L 320,30 L 340,70 L 360,50 L 500,50" 
+                                />
+                                <path 
+                                    fill="none" 
+                                    stroke="rgba(0, 243, 255, 0.2)" 
+                                    strokeWidth="3" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    d="M 0,50 L 100,50 L 120,20 L 140,80 L 160,50 L 300,50 L 320,30 L 340,70 L 360,50 L 500,50" 
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const RightPanel = () => {
+            const [isLoading, setIsLoading] = useState(false);
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                setIsLoading(true);
+                setTimeout(() => setIsLoading(false), 2000);
+            };
+
+            return (
+                <div className="w-full md:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative bg-[#060913]">
+                    {/* Mobile Background Elements */}
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-30 md:hidden"></div>
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-neonPurple rounded-full blur-[100px] opacity-20 md:hidden"></div>
+                    
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.6 }}
+                        className="w-full max-w-md glow-border relative z-10"
+                    >
+                        <div className="glass-card rounded-[26px] p-8 sm:p-10">
+                            
+                            {/* Mobile Title (hidden on desktop) */}
+                            <div className="md:hidden text-center mb-8">
+                                <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-neonCyan to-neonBlue flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.4)] mb-4 animate-heartbeat">
+                                    <i className="fa-solid fa-brain text-xl text-white"></i>
+                                </div>
+                                <h2 className="text-2xl font-bold">HealthWise AI</h2>
+                            </div>
+
+                            <div className="mb-8">
+                                <h2 className="text-2xl font-semibold mb-2">Welcome Back</h2>
+                                <p className="text-gray-400 text-sm">Access your medical dashboard securely.</p>
+                            </div>
+
+                            <form onSubmit={handleLogin} className="space-y-5">
+                                <div className="space-y-2">
+                                    <label className="text-sm text-gray-300 font-medium ml-1">Username</label>
+                                    <div className="relative">
+                                        <i className="fa-regular fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-neonCyan opacity-70"></i>
+                                        <input 
+                                            type="text" 
+                                            className="w-full input-cyber rounded-xl py-3 pl-11 pr-4"
+                                            placeholder="Enter username"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center ml-1">
+                                        <label className="text-sm text-gray-300 font-medium">Password</label>
+                                        <a href="#" className="text-xs text-neonCyan hover:text-neonPurple transition-colors">Forgot Password?</a>
+                                    </div>
+                                    <div className="relative">
+                                        <i className="fa-solid fa-fingerprint absolute left-4 top-1/2 transform -translate-y-1/2 text-neonPurple opacity-70"></i>
+                                        <input 
+                                            type="password" 
+                                            className="w-full input-cyber rounded-xl py-3 pl-11 pr-4"
+                                            placeholder="••••••••"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center text-sm pt-1">
+                                    <label className="flex items-center space-x-2 cursor-pointer group">
+                                        <input type="checkbox" className="rounded bg-black/50 border-gray-600 text-neonCyan focus:ring-neonCyan/50" />
+                                        <span className="text-gray-400 group-hover:text-gray-200 transition-colors">Remember me</span>
+                                    </label>
+                                </div>
+
+                                <motion.button 
+                                    whileTap={{ scale: 0.95 }}
+                                    type="submit" 
+                                    className="w-full btn-cyber rounded-xl py-3.5 mt-2 font-semibold tracking-wide flex items-center justify-center space-x-2"
+                                >
+                                    {isLoading ? (
+                                        <i className="fa-solid fa-circle-notch fa-spin"></i>
+                                    ) : (
+                                        <>
+                                            <span>Secure Login</span>
+                                            <i className="fa-solid fa-arrow-right text-sm"></i>
+                                        </>
+                                    )}
+                                </motion.button>
+                            </form>
+
+                            <p className="text-center mt-8 text-sm text-gray-400">
+                                Need access? <a href="#" className="text-white hover:text-neonCyan font-medium transition-colors">Create Account</a>
+                            </p>
+                        </div>
+                    </motion.div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            return (
+                <div className="flex flex-col md:flex-row min-h-screen w-full selection:bg-neonCyan/30">
+                    <LeftPanel />
+                    <RightPanel />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

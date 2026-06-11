@@ -1,0 +1,10 @@
+
+streamlit==1.25.0
+# The following packages are required for the project to run
+pandas
+numpy
+scikit-learn
+joblib
+matplotlib
+seaborn
+

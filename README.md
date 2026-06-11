@@ -1,5 +1,3 @@
-# HealthWise---Disease-Prediction-System-main-
-Disease prediction Engine
 # HealthWise - Disease Prediction System
 
 ## Overview

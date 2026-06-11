@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic AI Login</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        neonCyan: '#00f3ff',
+                        neonPurple: '#b026ff',
+                        deepSpace: '#090a0f',
+                        glassLight: 'rgba(255, 255, 255, 0.03)',
+                        glassBorder: 'rgba(255, 255, 255, 0.05)',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@6.5.1/dist/framer-motion.js"></script>
+
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background: #090a0f; }
+        .glass-panel {
+            background: rgba(15, 15, 25, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .light-mode .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+            color: #111;
+        }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+        .input-glass {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .input-glass:focus {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: #00f3ff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+        .light-mode .input-glass {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #111;
+        }
+        .btn-neon {
+            background: linear-gradient(135deg, #00f3ff 0%, #b026ff 100%);
+            box-shadow: 0 0 20px rgba(176, 38, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-neon:hover {
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.6);
+            filter: brightness(1.2);
+        }
+        
+        /* Spinner for loading state */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="font-poppins text-white transition-colors duration-500">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        const ParticleBackground = ({ isLight }) => {
+            return (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                    {/* Glowing Orbs */}
+                    <motion.div 
+                        animate={{ 
+                            x: [0, 50, -50, 0], 
+                            y: [0, -50, 50, 0],
+                            scale: [1, 1.2, 1]
+                        }}
+                        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                        className={`absolute top-[10%] left-[20%] w-96 h-96 rounded-full blur-[100px] opacity-40 ${isLight ? 'bg-blue-300' : 'bg-neonCyan'}`}
+                    />
+                    <motion.div 
+                        animate={{ 
+                            x: [0, -60, 60, 0], 
+                            y: [0, 60, -60, 0],
+                            scale: [1, 1.3, 1]
+                        }}
+                        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                        className={`absolute bottom-[10%] right-[20%] w-96 h-96 rounded-full blur-[120px] opacity-30 ${isLight ? 'bg-purple-300' : 'bg-neonPurple'}`}
+                    />
+                    
+                    {/* Grid Overlay for Cyberpunk feel */}
+                    <div className={`absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDUpIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0wIDQwaDQwTTAgMGgwIi8+PHBhdGggZD0iTTQwIDB2NDBNMCAwdjAiLz48L2c+PC9zdmc+')] ${isLight ? 'opacity-20' : 'opacity-40'}`}></div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [isLight, setIsLight] = useState(false);
+            const [isLoading, setIsLoading] = useState(false);
+            const [username, setUsername] = useState("");
+            const [password, setPassword] = useState("");
+
+            // Toggle theme class on body
+            useEffect(() => {
+                if (isLight) {
+                    document.body.classList.add('light-mode');
+                    document.body.style.background = '#f0f4f8';
+                } else {
+                    document.body.classList.remove('light-mode');
+                    document.body.style.background = '#090a0f';
+                }
+            }, [isLight]);
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                setIsLoading(true);
+                setTimeout(() => {
+                    setIsLoading(false);
+                    // Mock success
+                    alert("Authentication via Next-Gen API successful!");
+                }, 2000);
+            };
+
+            return (
+                <div className="relative min-h-screen flex items-center justify-center p-4">
+                    <ParticleBackground isLight={isLight} />
+                    
+                    {/* Theme Toggle */}
+                    <button 
+                        onClick={() => setIsLight(!isLight)}
+                        className={`absolute top-6 right-6 z-50 p-3 rounded-full glass-panel transition-transform hover:scale-110 ${isLight ? 'text-gray-800' : 'text-white'}`}
+                    >
+                        {isLight ? <i className="fa-solid fa-moon"></i> : <i className="fa-solid fa-sun"></i>}
+                    </button>
+
+                    <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="glass-panel w-full max-w-md rounded-[30px] p-10 relative z-10"
+                    >
+                        <div className="text-center mb-8">
+                            <motion.div 
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                                className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-tr from-neonCyan to-neonPurple p-[2px]"
+                            >
+                                <div className={`w-full h-full rounded-full flex items-center justify-center ${isLight ? 'bg-white' : 'bg-deepSpace'}`}>
+                                    <i className="fa-solid fa-dna text-2xl bg-clip-text text-transparent bg-gradient-to-tr from-neonCyan to-neonPurple"></i>
+                                </div>
+                            </motion.div>
+                            <h1 className={`text-3xl font-bold tracking-tight mb-2 ${!isLight && 'neon-text'}`}>
+                                HealthWise AI
+                            </h1>
+                            <p className={isLight ? 'text-gray-600' : 'text-gray-400'}>
+                                Predictive medical intelligence.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleLogin} className="space-y-5">
+                            <div className="space-y-1 relative">
+                                <label className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>Username</label>
+                                <div className="relative">
+                                    <i className={`fa-regular fa-user absolute left-4 top-1/2 transform -translate-y-1/2 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}></i>
+                                    <input 
+                                        type="text" 
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className={`w-full input-glass rounded-xl py-3 pl-11 pr-4 outline-none ${isLight ? 'placeholder-gray-400' : 'placeholder-gray-500 text-white'}`}
+                                        placeholder="Enter your username"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1 relative">
+                                <label className={`text-sm font-medium ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>Password</label>
+                                <div className="relative">
+                                    <i className={`fa-solid fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}></i>
+                                    <input 
+                                        type="password" 
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className={`w-full input-glass rounded-xl py-3 pl-11 pr-4 outline-none ${isLight ? 'placeholder-gray-400' : 'placeholder-gray-500 text-white'}`}
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-sm">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input type="checkbox" className="rounded text-neonCyan focus:ring-neonCyan bg-transparent border-gray-600" />
+                                    <span className={isLight ? 'text-gray-600' : 'text-gray-400'}>Remember me</span>
+                                </label>
+                                <a href="#" className="text-neonCyan hover:text-neonPurple transition-colors">Forgot Password?</a>
+                            </div>
+
+                            <motion.button 
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                type="submit" 
+                                disabled={isLoading}
+                                className="w-full btn-neon rounded-xl py-3.5 font-semibold text-white flex items-center justify-center space-x-2 mt-4"
+                            >
+                                {isLoading ? (
+                                    <div className="spinner"></div>
+                                ) : (
+                                    <span>Authenticate Session</span>
+                                )}
+                            </motion.button>
+                        </form>
+
+                        <div className="mt-8">
+                            <div className="relative flex items-center justify-center">
+                                <div className={`absolute inset-0 flex items-center`}>
+                                    <div className={`w-full border-t ${isLight ? 'border-gray-300' : 'border-gray-700'}`}></div>
+                                </div>
+                                <div className={`relative px-4 text-xs uppercase ${isLight ? 'bg-white text-gray-500' : 'bg-transparent text-gray-400 backdrop-blur-md'}`}>
+                                    Or continue with
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4 mt-6">
+                                <motion.button whileHover={{ y: -2 }} className={`flex justify-center items-center py-2.5 rounded-lg border transition-colors ${isLight ? 'border-gray-300 hover:bg-gray-50 text-gray-700' : 'border-gray-700 hover:bg-gray-800 text-white'}`}>
+                                    <i className="fa-brands fa-google text-lg"></i>
+                                </motion.button>
+                                <motion.button whileHover={{ y: -2 }} className={`flex justify-center items-center py-2.5 rounded-lg border transition-colors ${isLight ? 'border-gray-300 hover:bg-gray-50 text-gray-700' : 'border-gray-700 hover:bg-gray-800 text-white'}`}>
+                                    <i className="fa-brands fa-github text-lg"></i>
+                                </motion.button>
+                                <motion.button whileHover={{ y: -2 }} className={`flex justify-center items-center py-2.5 rounded-lg border transition-colors ${isLight ? 'border-gray-300 hover:bg-gray-50 text-gray-700' : 'border-gray-700 hover:bg-gray-800 text-white'}`}>
+                                    <i className="fa-brands fa-linkedin text-lg text-[#0a66c2]"></i>
+                                </motion.button>
+                            </div>
+                        </div>
+
+                        <p className={`text-center mt-8 text-sm ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+                            Don't have an account? <a href="#" className="text-neonCyan hover:text-neonPurple font-semibold transition-colors">Create Account</a>
+                        </p>
+                    </motion.div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
